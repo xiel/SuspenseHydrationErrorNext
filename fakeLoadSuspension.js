@@ -1,33 +1,49 @@
-let didSuspensionFinish = false;
-let suspensionPromise = null;
+import { useSyncExternalStore } from "react";
+import { createStore } from "./store";
+
+const store = createStore();
 
 export function SomethingA() {
-  fakeLoadSuspension("A");
+  useFakeLoadSuspension("A");
   return <p>A</p>;
 }
 
 export function SomethingB() {
-  fakeLoadSuspension("B");
+  useFakeLoadSuspension("B");
   return <p>B</p>;
 }
 
-function fakeLoadSuspension(label = "") {
+function useFakeLoadSuspension(label = "") {
   console.log("Rendering", label);
 
-  if (!didSuspensionFinish) {
-    if (suspensionPromise) {
+  const state = useSyncExternalStore(
+    store.subscribe,
+    store.getSnapshot,
+    store.getSnapshot
+  );
+
+  if (!state.didSuspensionFinish) {
+    if (state.suspensionPromise) {
       console.log("Suspending by reusing promise in", label);
-      throw suspensionPromise;
+      throw state.suspensionPromise;
     } else {
-      suspensionPromise = new Promise((resolve) => {
+      const suspensionPromise = new Promise((resolve) => {
         setTimeout(() => {
-          console.log("- - - -");
           console.log("Promise resolved in", label);
-          console.log("- - - -");
-          didSuspensionFinish = true;
+
+          store.updateState({
+            didSuspensionFinish: true,
+            suspensionPromise: null,
+          });
+
           resolve();
-        }, 200);
+        }, 1000);
       });
+
+      store.updateState({
+        suspensionPromise,
+      });
+
       console.log("Suspending in", label);
       throw suspensionPromise;
     }

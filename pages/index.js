@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { SomethingA } from "../fakeLoadSuspension";
 import { CounterButton } from "../CounterButton";
 
@@ -20,7 +20,7 @@ export default function IndexPage() {
           </cite>
         </figcaption>
       </figure>
-      <h4>This headline hydrates fine.</h4>
+      <h4>This headline hydrates fine. </h4>
       <SomethingA />
       <h3>
         💥 This element after the suspending Component triggers an error (only
